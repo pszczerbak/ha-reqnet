@@ -1,5 +1,10 @@
 # REQNET for Home Assistant
 
+> **📦 [INSTALLATION GUIDE — HACS & manual setup](INSTALLATION.md)**  
+> Step-by-step instructions, MQTT broker prerequisites, first-time configuration, upgrades and troubleshooting.  
+> **[Open the installation instructions →](INSTALLATION.md)**
+
+
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 A local-first, community-developed Home Assistant integration for compatible **REQNET ventilation/heat recovery units**. It reads data over **MQTT** and the device's **local REST API**, and offers confirmed MQTT control for supported operations. No vendor cloud account is required.
@@ -20,6 +25,8 @@ A local-first, community-developed Home Assistant integration for compatible **R
 **Important:** Connecting Home Assistant to a broker does **not** automatically configure the REQNET device to publish there. The integration's setup wizard can configure the additional broker for you, or you can skip that step if it is already configured.
 
 ## Installation
+
+**Start here: [Step-by-step installation guide (HACS or manual)](INSTALLATION.md).** It includes the required device-side MQTT broker setup, configuration and upgrade steps.
 
 ### HACS (custom repository)
 
