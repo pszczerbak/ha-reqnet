@@ -1,0 +1,216 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect REQNET",
+        "description": "Enter the REQNET device hostname/IP and Wi-Fi MAC. Optionally provision its additional MQTT broker; otherwise it must already be configured.",
+        "data": {
+          "host": "REQNET IP address",
+          "mac": "REQNET MAC address",
+          "configure_broker": "Configure additional MQTT broker on REQNET"
+        }
+      },
+      "broker": {
+        "title": "Configure additional MQTT broker",
+        "description": "REQNET sends broker credentials in a plaintext local HTTP GET request. Use ONLY on a trusted LAN. Credentials are not saved by this integration. Broker must also be configured in Home Assistant.",
+        "data": {
+          "broker_address": "Broker hostname or IP address",
+          "broker_port": "MQTT broker port",
+          "broker_user": "MQTT username (optional)",
+          "broker_password": "MQTT password (optional)",
+          "acknowledge_insecure_http": "I accept the plaintext HTTP transport risk"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Invalid MAC address",
+      "invalid_response": "Invalid REQNET response",
+      "cannot_connect": "Cannot connect to REQNET",
+      "invalid_host": "Invalid hostname or IP address",
+      "http_ack_required": "Confirm the HTTP security warning",
+      "broker_rejected": "REQNET rejected broker settings",
+      "broker_failed": "Could not configure the broker on REQNET"
+    },
+    "abort": {
+      "already_configured": "Device already configured"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "intake_temperature": {
+        "name": "Intake temperature"
+      },
+      "supply_temperature": {
+        "name": "Supply temperature"
+      },
+      "extract_temperature": {
+        "name": "Extract temperature"
+      },
+      "humidity": {
+        "name": "Humidity"
+      },
+      "co2": {
+        "name": "CO₂"
+      },
+      "supply_airflow": {
+        "name": "Supply airflow"
+      },
+      "extract_airflow": {
+        "name": "Extract airflow"
+      },
+      "supply_fan_power": {
+        "name": "Supply fan power"
+      },
+      "extract_fan_power": {
+        "name": "Extract fan power"
+      },
+      "airing_time_remaining": {
+        "name": "Airing time remaining"
+      },
+      "alert_code": {
+        "name": "Alert code"
+      },
+      "active_alert": {
+        "name": "Active alert",
+        "state": {
+          "none": "None",
+          "filter_replacement": "Replace filters",
+          "other": "Other notification"
+        }
+      },
+      "error_count": {
+        "name": "Error count"
+      },
+      "last_error": {
+        "name": "Last error"
+      },
+      "wifi_signal_description": {
+        "name": "Wi-Fi signal description"
+      },
+      "manual_supply_airflow_target": {
+        "name": "Manual supply airflow target"
+      },
+      "manual_extract_airflow_target": {
+        "name": "Manual extract airflow target"
+      },
+      "max_supply_airflow": {
+        "name": "Maximum supply airflow"
+      },
+      "filter_days_remaining": {
+        "name": "Days until filter replacement"
+      },
+      "supply_duct_resistance": {
+        "name": "Supply duct resistance"
+      },
+      "extract_duct_resistance": {
+        "name": "Extract duct resistance"
+      },
+      "supply_fan_output": {
+        "name": "Supply fan output"
+      },
+      "extract_fan_output": {
+        "name": "Extract fan output"
+      },
+      "supply_pressure": {
+        "name": "Supply pressure"
+      },
+      "extract_pressure": {
+        "name": "Extract pressure"
+      },
+      "error_code": {
+        "name": "Error code"
+      },
+      "filter_warning_days": {
+        "name": "Filter warning lead time"
+      },
+      "filter_service_interval_days": {
+        "name": "Filter replacement interval"
+      },
+      "exhaust_temperature": {
+        "name": "Exhaust temperature"
+      }
+    },
+    "binary_sensor": {
+      "filter_replacement_required": {
+        "name": "Filter replacement required"
+      },
+      "connected": {
+        "name": "Connected"
+      },
+      "bypass_open": {
+        "name": "Bypass damper open"
+      },
+      "error_active": {
+        "name": "Error active"
+      }
+    },
+    "select": {
+      "ventilation_mode": {
+        "name": "Ventilation mode",
+        "state": {
+          "automatic": "Automatic",
+          "manual": "Manual",
+          "airing": "Airing"
+        }
+      },
+      "bypass_mode": {
+        "name": "Bypass mode",
+        "state": {
+          "closed": "Closed",
+          "open": "Open",
+          "auto": "Automatic"
+        }
+      },
+      "manual_airflow_request": {
+        "name": "Requested manual airflow profile"
+      }
+    },
+    "number": {
+      "airing_duration_request": {
+        "name": "Requested airing duration"
+      }
+    },
+    "button": {
+      "airing_start": {
+        "name": "Start airing"
+      },
+      "airing_stop": {
+        "name": "Stop airing"
+      },
+      "apply_manual_airflow": {
+        "name": "Apply manual airflow"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Additional MQTT broker",
+        "description": "You can skip this if REQNET already uses the correct broker.",
+        "data": {
+          "configure_broker": "Configure additional MQTT broker on REQNET"
+        }
+      },
+      "broker": {
+        "title": "Configure additional MQTT broker",
+        "description": "REQNET sends broker credentials in a plaintext local HTTP GET request. Use ONLY on a trusted LAN. Credentials are not saved by this integration. Broker must also be configured in Home Assistant.",
+        "data": {
+          "broker_address": "Broker hostname or IP address",
+          "broker_port": "MQTT broker port",
+          "broker_user": "MQTT username (optional)",
+          "broker_password": "MQTT password (optional)",
+          "acknowledge_insecure_http": "I accept the plaintext HTTP transport risk"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Invalid MAC address",
+      "invalid_response": "Invalid REQNET response",
+      "cannot_connect": "Cannot connect to REQNET",
+      "invalid_host": "Invalid hostname or IP address",
+      "http_ack_required": "Confirm the HTTP security warning",
+      "broker_rejected": "REQNET rejected broker settings",
+      "broker_failed": "Could not configure the broker on REQNET"
+    }
+  }
+}

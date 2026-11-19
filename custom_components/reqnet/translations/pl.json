@@ -1,0 +1,216 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Połącz REQNET",
+        "description": "Podaj adres urządzenia REQNET i MAC modułu Wi-Fi. Opcjonalnie skonfiguruj dodatkowy broker MQTT; w przeciwnym razie musi on być już skonfigurowany.",
+        "data": {
+          "host": "Adres IP REQNET",
+          "mac": "Adres MAC REQNET",
+          "configure_broker": "Skonfiguruj dodatkowy broker MQTT na REQNET"
+        }
+      },
+      "broker": {
+        "title": "Konfiguracja dodatkowego brokera MQTT",
+        "description": "REQNET przesyła dane logowania do brokera przez nieszyfrowane lokalne żądanie HTTP GET. Korzystaj TYLKO w zaufanej sieci LAN. Integracja nie zapisuje danych logowania. Broker musi być również skonfigurowany w Home Assistant.",
+        "data": {
+          "broker_address": "Nazwa hosta lub adres IP brokera",
+          "broker_port": "Port brokera MQTT",
+          "broker_user": "Użytkownik MQTT (opcjonalnie)",
+          "broker_password": "Hasło MQTT (opcjonalnie)",
+          "acknowledge_insecure_http": "Akceptuję ryzyko przesyłania danych przez nieszyfrowany HTTP"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Nieprawidłowy adres MAC",
+      "invalid_response": "Nieprawidłowa odpowiedź REQNET",
+      "cannot_connect": "Nie można połączyć z REQNET",
+      "invalid_host": "Nieprawidłowy adres urządzenia lub brokera",
+      "http_ack_required": "Potwierdź ostrzeżenie dotyczące HTTP",
+      "broker_rejected": "REQNET odrzucił ustawienia brokera",
+      "broker_failed": "Nie udało się skonfigurować brokera na REQNET"
+    },
+    "abort": {
+      "already_configured": "Urządzenie jest już skonfigurowane"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "intake_temperature": {
+        "name": "Temperatura wlotu"
+      },
+      "supply_temperature": {
+        "name": "Temperatura nawiewu"
+      },
+      "extract_temperature": {
+        "name": "Temperatura wyciągu"
+      },
+      "humidity": {
+        "name": "Wilgotność"
+      },
+      "co2": {
+        "name": "CO₂"
+      },
+      "supply_airflow": {
+        "name": "Przepływ nawiewu"
+      },
+      "extract_airflow": {
+        "name": "Przepływ wywiewu"
+      },
+      "supply_fan_power": {
+        "name": "Moc wentylatora nawiewu"
+      },
+      "extract_fan_power": {
+        "name": "Moc wentylatora wywiewu"
+      },
+      "airing_time_remaining": {
+        "name": "Pozostały czas przewietrzania"
+      },
+      "alert_code": {
+        "name": "Kod alertu"
+      },
+      "active_alert": {
+        "name": "Aktualny alert",
+        "state": {
+          "none": "Brak",
+          "filter_replacement": "Wymiana filtrów",
+          "other": "Inne powiadomienie"
+        }
+      },
+      "error_count": {
+        "name": "Liczba błędów"
+      },
+      "last_error": {
+        "name": "Ostatni błąd"
+      },
+      "wifi_signal_description": {
+        "name": "Opis sygnału Wi-Fi"
+      },
+      "manual_supply_airflow_target": {
+        "name": "Zadany nawiew ręczny"
+      },
+      "manual_extract_airflow_target": {
+        "name": "Zadany wywiew ręczny"
+      },
+      "max_supply_airflow": {
+        "name": "Maksymalna wydajność nawiewu"
+      },
+      "filter_days_remaining": {
+        "name": "Dni do wymiany filtrów"
+      },
+      "supply_duct_resistance": {
+        "name": "Opór ciągu nawiewnego"
+      },
+      "extract_duct_resistance": {
+        "name": "Opór ciągu wywiewnego"
+      },
+      "supply_fan_output": {
+        "name": "Praca wentylatora nawiewu"
+      },
+      "extract_fan_output": {
+        "name": "Praca wentylatora wywiewu"
+      },
+      "supply_pressure": {
+        "name": "Ciśnienie nawiewu"
+      },
+      "extract_pressure": {
+        "name": "Ciśnienie wywiewu"
+      },
+      "error_code": {
+        "name": "Kod błędu"
+      },
+      "filter_warning_days": {
+        "name": "Wyprzedzenie przypomnienia o filtrach"
+      },
+      "filter_service_interval_days": {
+        "name": "Interwał wymiany filtrów"
+      },
+      "exhaust_temperature": {
+        "name": "Temperatura wyrzutni"
+      }
+    },
+    "binary_sensor": {
+      "filter_replacement_required": {
+        "name": "Wymagana wymiana filtrów"
+      },
+      "connected": {
+        "name": "Połączony"
+      },
+      "bypass_open": {
+        "name": "Klapa bypassu otwarta"
+      },
+      "error_active": {
+        "name": "Aktywny błąd"
+      }
+    },
+    "select": {
+      "ventilation_mode": {
+        "name": "Tryb wentylacji",
+        "state": {
+          "automatic": "Automatyczny",
+          "manual": "Ręczny",
+          "airing": "Przewietrzanie"
+        }
+      },
+      "bypass_mode": {
+        "name": "Tryb bypassu",
+        "state": {
+          "closed": "Zamknięty",
+          "open": "Otwarty",
+          "auto": "Automatyczny"
+        }
+      },
+      "manual_airflow_request": {
+        "name": "Żądany profil ręczny nawiew/wywiew"
+      }
+    },
+    "number": {
+      "airing_duration_request": {
+        "name": "Żądany czas przewietrzania"
+      }
+    },
+    "button": {
+      "airing_start": {
+        "name": "Uruchom przewietrzanie"
+      },
+      "airing_stop": {
+        "name": "Zatrzymaj przewietrzanie"
+      },
+      "apply_manual_airflow": {
+        "name": "Zastosuj profil ręczny"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Dodatkowy broker MQTT",
+        "description": "Pomiń, jeśli REQNET już korzysta z właściwego brokera.",
+        "data": {
+          "configure_broker": "Skonfiguruj dodatkowy broker MQTT na REQNET"
+        }
+      },
+      "broker": {
+        "title": "Konfiguracja dodatkowego brokera MQTT",
+        "description": "REQNET przesyła dane logowania do brokera przez nieszyfrowane lokalne żądanie HTTP GET. Korzystaj TYLKO w zaufanej sieci LAN. Integracja nie zapisuje danych logowania. Broker musi być również skonfigurowany w Home Assistant.",
+        "data": {
+          "broker_address": "Nazwa hosta lub adres IP brokera",
+          "broker_port": "Port brokera MQTT",
+          "broker_user": "Użytkownik MQTT (opcjonalnie)",
+          "broker_password": "Hasło MQTT (opcjonalnie)",
+          "acknowledge_insecure_http": "Akceptuję ryzyko przesyłania danych przez nieszyfrowany HTTP"
+        }
+      }
+    },
+    "error": {
+      "invalid_mac": "Nieprawidłowy adres MAC",
+      "invalid_response": "Nieprawidłowa odpowiedź REQNET",
+      "cannot_connect": "Nie można połączyć z REQNET",
+      "invalid_host": "Nieprawidłowy adres urządzenia lub brokera",
+      "http_ack_required": "Potwierdź ostrzeżenie dotyczące HTTP",
+      "broker_rejected": "REQNET odrzucił ustawienia brokera",
+      "broker_failed": "Nie udało się skonfigurować brokera na REQNET"
+    }
+  }
+}

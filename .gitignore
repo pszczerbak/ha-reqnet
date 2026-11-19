@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Home Assistant / local runtime (never publish private HA config)
+.storage/
+secrets.yaml
+configuration.yaml
+automations.yaml
+scripts.yaml
+scenes.yaml
+home-assistant_v2.db*
+home-assistant.log*
+*.db
+*.log
+*.sqlite*
+*.tar.gz
+*.zip
+
+# Tools / IDE
+.DS_Store
+.idea/
+.vscode/
