@@ -8,6 +8,7 @@ import asyncio
 from datetime import timedelta
 import json
 import logging
+import math
 from time import monotonic
 
 import aiohttp
@@ -44,6 +45,9 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
         self._waiting_for = None
         self._message_counter = 0
         self._last_success = None
+        self._last_work_success = None
+        self._error_sample_valid = False
+        self._alert_sample_valid = False
         self._positive_alert_code = None
         self._last_positive_alert = None
         self._announced_alert = None
@@ -57,28 +61,56 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
     def connected(self):
         return self._last_success is not None and (monotonic() - self._last_success) < 90
 
+
+    @staticmethod
+    def _validated_code(value):
+        """Return a non-negative integral code or None."""
+        if type(value) is int:
+            return value if value >= 0 else None
+        if type(value) is float:
+            if math.isfinite(value) and value >= 0 and value.is_integer():
+                return int(value)
+        return None
+
+    @property
+    def work_fresh(self):
+        """Only accepted work samples refresh this timestamp."""
+        return (
+            self._last_work_success is not None
+            and monotonic() - self._last_work_success < 90
+        )
+
     @property
     def alert_code(self):
-        work = self.data.get("work")
-        if work is None:
+        if not self.work_fresh or not self._alert_sample_valid:
             return None
-        raw = work[41] if len(work) > 41 else None
-        if isinstance(raw, (int, float)) and raw > 0:
-            return int(raw)
+        work = self.data.get("work")
+        if work is None or len(work) <= 41:
+            return None
+        raw = self._validated_code(work[41])
+        if raw is None:
+            return None
+        if raw > 0:
+            return raw
         if self._positive_alert_code is not None and self._last_positive_alert is not None:
             if monotonic() - self._last_positive_alert < 60:
                 return self._positive_alert_code
         return 0
 
+
     @property
     def error_code(self):
-        """Active error code, with tolerance for transient zero samples."""
+        """Return a validated error code from fresh work data."""
+        if not self.work_fresh or not self._error_sample_valid:
+            return None
         work = self.data.get("work")
         if work is None or len(work) <= 40:
             return None
-        raw = work[40]
-        if isinstance(raw, (int, float)) and raw > 0:
-            return int(raw)
+        raw = self._validated_code(work[40])
+        if raw is None:
+            return None
+        if raw > 0:
+            return raw
         if self._positive_error_code is not None and self._last_positive_error is not None:
             if monotonic() - self._last_positive_error < 60:
                 return self._positive_error_code
@@ -111,18 +143,27 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
         return obj
 
     def _update_work(self, payload):
+        if not isinstance(payload, dict) or payload.get("CurrentWorkParametersResult") is not True:
+            self._error_sample_valid = False
+            self._alert_sample_valid = False
+            return False
         values = payload.get("Values")
         if not isinstance(values, list) or len(values) < 84:
+            self._error_sample_valid = False
+            self._alert_sample_valid = False
             return False
         self.data["work"] = values
+        self._last_work_success = monotonic()
+        self._error_sample_valid = self._validated_code(values[40]) is not None
+        self._alert_sample_valid = self._validated_code(values[41]) is not None
         # CurrentWorkParameters is 1-based in the vendor documentation:
         # Python [5]/[6] are the applied manual supply/extract targets.
         pair = (values[5], values[6])
         if pair in ((300, 300), (550, 550)) and values[10] == 8:
             self.manual_profile = f"{pair[0]} / {pair[1]}"
         # Error code [40] is distinct from informational message code [41].
-        error = values[40]
-        if isinstance(error, (int, float)) and error > 0:
+        error = self._validated_code(values[40])
+        if error is not None and error > 0:
             self._positive_error_code = int(error)
             self._last_positive_error = monotonic()
             if self._announced_error != int(error):
@@ -136,14 +177,14 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
                 self.hass.bus.async_fire("reqnet_error_changed", {
                     "mac": self.mac, "code": int(error),
                 })
-        elif self._announced_error is not None and self._last_positive_error is not None:
+        elif error == 0 and self._announced_error is not None and self._last_positive_error is not None:
             if monotonic() - self._last_positive_error >= 60:
                 self._announced_error = None
                 self.hass.bus.async_fire("reqnet_error_changed", {
                     "mac": self.mac, "code": 0,
                 })
-        code = values[41]
-        if isinstance(code, (int, float)) and code > 0:
+        code = self._validated_code(values[41])
+        if code is not None and code > 0:
             self._positive_alert_code = int(code)
             self._last_positive_alert = monotonic()
             if self._announced_alert != int(code):
@@ -160,7 +201,7 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
                 self.hass.bus.async_fire("reqnet_alert_changed", {
                     "mac": self.mac, "code": int(code), "description": description,
                 })
-        elif self._announced_alert is not None and self._last_positive_alert is not None:
+        elif code == 0 and self._announced_alert is not None and self._last_positive_alert is not None:
             if monotonic() - self._last_positive_alert >= 60:
                 self._announced_alert = None
                 self.hass.bus.async_fire("reqnet_alert_changed", {
@@ -185,7 +226,7 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
             if not self._update_work(work):
                 raise UpdateFailed("REQNET invalid work parameters array")
         except UpdateFailed:
-            if self.data["work"] is None or not self.connected:
+            if self.data["work"] is None or not self.work_fresh:
                 raise
             _LOGGER.warning("REQNET REST poll failed; retaining fresh MQTT state")
 
@@ -241,9 +282,16 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
             return
         suffix = message.topic.removeprefix(self.prefix)
         changed = False
-        if suffix == "CurrentWorkParametersResult" and payload.get("CurrentWorkParametersResult") is True:
+        if suffix == "CurrentWorkParametersResult":
+            if message.retain:
+                return
             changed = self._update_work(payload)
+            if not changed:
+                # Publish invalidation without refreshing work freshness.
+                changed = True
         elif suffix == "CurrentTemperaturesResult" and payload.get("CurrentTemperaturesResult") is True:
+            if message.retain:
+                return
             changed = self._update_temps(payload)
         elif suffix == "GetTheListOfMessagesResult" and payload.get("GetTheListOfMessagesResult") is True:
             self.data["messages"] = payload
