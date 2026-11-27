@@ -78,3 +78,5 @@ The observed MQTT topic `CurrentTemperaturesResult` uses `IntakeTemp`, `Launcher
 - Some devices return only `{"GetTheListOfMessagesResult":true}`. This does not prove the log has zero entries.
 - `ReplaceFilters` resets the filter counter and must not be called as a passive diagnostic operation.
 - `SetFiltersParameters` changes service-reminder parameters and may alter the filter timer; it is not exposed as a writable entity.
+
+Before publishing ManualMode, the integration checks the positive integral limits at CurrentWorkParameters `Values[1]` and GetWorkParameters `Values[41]` (distinct zero-based arrays). The requested balanced profile must not exceed either limit. The applied targets in `Values[5]` and `Values[6]` are distinct from measured flows in `Values[3]` and `Values[4]`.

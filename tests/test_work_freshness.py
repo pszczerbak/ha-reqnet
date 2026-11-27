@@ -41,6 +41,7 @@ class WorkFreshnessTests(unittest.TestCase):
                    timedelta=timedelta, _LOGGER=None, CONF_HOST="host", CONF_MAC="mac",
                    monotonic=lambda: self.clock, callback=lambda fn: fn,
                    persistent_notification=SimpleNamespace(async_create=lambda *a, **kw: None))
+        exec(compile(SOURCE.with_name("const.py").read_text(encoding="utf-8"), "const.py", "exec"), env)
         exec(compile(module, str(SOURCE), "exec"), env)
         hass = SimpleNamespace(config=SimpleNamespace(language="en"), bus=SimpleNamespace(
             async_fire=lambda name, data: self.events.append((name, dict(data)))))

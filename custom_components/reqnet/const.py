@@ -20,3 +20,11 @@ BYPASS_TO_NUMBER = {"closed": 0, "open": 1, "auto": 2}
 NUMBER_TO_BYPASS = {0: "closed", 1: "open", 2: "auto", 3: "auto"}
 # 2 = automatic with damper closed; 3 = automatic with damper open.
 # SetByPassMode command for automatic is always {"mode":2}.
+
+
+# Balanced manual airflow requests, in cubic metres per hour.
+MANUAL_AIRFLOW_VALUES = tuple(range(100, 551, 50))
+MANUAL_AIRFLOW_PROFILES = {
+    f"{value} / {value}": value
+    for value in MANUAL_AIRFLOW_VALUES
+}

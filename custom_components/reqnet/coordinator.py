@@ -19,7 +19,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_MAC, DOMAIN
+from .const import CONF_MAC, DOMAIN, MANUAL_AIRFLOW_VALUES, MANUAL_AIRFLOW_PROFILES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -158,9 +158,17 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
         self._alert_sample_valid = self._validated_code(values[41]) is not None
         # CurrentWorkParameters is 1-based in the vendor documentation:
         # Python [5]/[6] are the applied manual supply/extract targets.
-        pair = (values[5], values[6])
-        if pair in ((300, 300), (550, 550)) and values[10] == 8:
-            self.manual_profile = f"{pair[0]} / {pair[1]}"
+        # Initialize from the reported manual target only when no
+        # requested profile exists. Never overwrite a pending selection.
+        supply = self._validated_code(values[5])
+        extract = self._validated_code(values[6])
+        if (
+            self.manual_profile is None
+            and values[10] == 8
+            and supply == extract
+            and supply in MANUAL_AIRFLOW_VALUES
+        ):
+            self.manual_profile = f"{supply} / {supply}"
         # Error code [40] is distinct from informational message code [41].
         error = self._validated_code(values[40])
         if error is not None and error > 0:
@@ -352,11 +360,45 @@ class ReqnetCoordinator(DataUpdateCoordinator[dict]):
         await self.async_command("AutomaticMode", "", lambda v: v[10] == 9)
 
     async def async_set_manual(self):
-        if self.manual_profile not in ("300 / 300", "550 / 550"):
+        profile = self.manual_profile
+        if type(profile) is not str or profile not in MANUAL_AIRFLOW_PROFILES:
             raise HomeAssistantError(
                 "Select a validated manual airflow profile before changing mode"
             )
-        val = int(self.manual_profile.split(" /")[0])
+        val = MANUAL_AIRFLOW_PROFILES[profile]
+
+        # Verify both current and configured airflow limits.
+        try:
+            work = await self._read_rest("CurrentWorkParameters")
+            settings = await self._read_rest("GetWorkParameters")
+        except UpdateFailed as exc:
+            raise HomeAssistantError(
+                "REQNET airflow limits could not be verified"
+            ) from exc
+
+        work_values = work.get("Values")
+        setting_values = settings.get("Values")
+
+        if (
+            not isinstance(work_values, list)
+            or len(work_values) < 84
+            or not isinstance(setting_values, list)
+            or len(setting_values) < 44
+        ):
+            raise HomeAssistantError("REQNET airflow limits are unavailable")
+
+        limits = (
+            self._validated_code(work_values[1]),
+            self._validated_code(setting_values[41]),
+        )
+
+        if any(limit is None or limit <= 0 for limit in limits):
+            raise HomeAssistantError("REQNET airflow limits are invalid")
+
+        if val > min(limits):
+            raise HomeAssistantError(
+                "Requested airflow exceeds the configured device limit"
+            )
         await self.async_command(
             "ManualMode", json.dumps({"airflowvalue": val, "valueofairextraction": val}, separators=(",", ":")),
             lambda v: v[10] == 8 and v[5] == val and v[6] == val

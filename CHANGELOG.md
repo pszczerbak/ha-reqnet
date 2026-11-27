@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — 2026-11-27
+
+- Offer ten balanced manual airflow requests (100–550 m³/h, step 50), retaining existing entity IDs and legacy profiles.
+- Preserve the selected request during device polling; report applied targets and measured airflow separately.
+- Check both current and configured device airflow limits via REST before publishing ManualMode; preserve application ACK and REST confirmation.
+- Validate all ten profiles offline and as local HA selections; verify 250/250 on a physical unit and preservation of a pending 200/200 request across polling. Other new physical targets were not individually applied.
+
 ## 0.3.1 — 2026-11-26
 
 - Validate error and alert codes independently; reject negative, fractional, non-finite, boolean and non-numeric values instead of interpreting them as cleared alarms.

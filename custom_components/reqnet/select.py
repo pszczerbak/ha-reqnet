@@ -6,7 +6,7 @@ from homeassistant.components.select import SelectEntity
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.restore_state import RestoreEntity
 from .entity import ReqnetEntity
-from .const import NUMBER_TO_MODE, NUMBER_TO_BYPASS, BYPASS_TO_NUMBER
+from .const import NUMBER_TO_MODE, NUMBER_TO_BYPASS, BYPASS_TO_NUMBER, MANUAL_AIRFLOW_PROFILES
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -54,8 +54,8 @@ class ReqnetBypassMode(ReqnetEntity, SelectEntity):
 
 
 class ReqnetManualProfile(ReqnetEntity, SelectEntity, RestoreEntity):
-    """Only tested balanced profiles; never misrepresent actual airflow target."""
-    _attr_options = ["300 / 300", "550 / 550"]
+    """Requested balanced airflow; independent of reported device targets."""
+    _attr_options = list(MANUAL_AIRFLOW_PROFILES)
 
     def __init__(self, coordinator):
         super().__init__(coordinator, "manual_airflow_request", "select")
@@ -72,7 +72,7 @@ class ReqnetManualProfile(ReqnetEntity, SelectEntity, RestoreEntity):
         return self.coordinator.manual_profile
 
     async def async_select_option(self, option):
-        if option not in self.options:
+        if type(option) is not str or option not in self.options:
             raise HomeAssistantError("Unsupported manual airflow profile")
         # Only selects a command preset. Use Apply button or Manual mode to send.
         self.coordinator.manual_profile = option

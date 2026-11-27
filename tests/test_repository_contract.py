@@ -23,7 +23,7 @@ class RepositoryContract(unittest.TestCase):
     def test_manifest_and_version(self):
         manifest = json.loads((COMPONENT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual("reqnet", manifest["domain"])
-        self.assertEqual("0.3.1", manifest["version"])
+        self.assertEqual("0.3.2", manifest["version"])
         self.assertTrue(manifest["config_flow"])
         self.assertIn("mqtt", manifest["dependencies"])
         self.assertIn("@pszczerbak", manifest["codeowners"])

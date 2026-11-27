@@ -67,7 +67,7 @@ A separate checkbox explicitly acknowledges the HTTP security limitation below. 
 
 | Category | Entities/behaviour |
 | --- | --- |
-| Ventilation | Automatic/manual mode, controlled airing, previously verified manual airflow profiles (300/300 and 550/550 m³/h) |
+| Ventilation | Automatic/manual mode, controlled airing, balanced manual airflow requests (100–550 m³/h in 50 m³/h steps) |
 | Bypass | Closed, open and automatic modes; separate **actual damper-open** binary sensor. Vendor readback `2` = automatic/closed, `3` = automatic/open |
 | Temperatures | Intake, exhaust, supply and extract |
 | Air quality | Humidity and CO₂ |
@@ -92,7 +92,7 @@ Internal option keys remain in English. Display names and selectable states are 
 
 ## Known limitations
 
-- Only the tested balanced **300/300** and **550/550** profiles are exposed for manual control. These are not claimed to be the complete supported range across all REQNET models.
+- Manual airflow requests offer ten balanced profiles from **100 to 550 m³/h**, in 50 m³/h steps, bounded by the device's reported and configured limits. Selecting a profile does not send a device command; Apply or Manual mode sends it and verifies the applied targets via REST. Requested, applied and measured airflow are distinct. The new 250/250 profile was confirmed on a physical unit; all ten were tested offline and as local HA selections. Support may vary by model.
 - Airing duration in this integration is offered as a local request parameter (5–90 minutes in 5-minute steps); remaining time comes from the device.
 - The filter replacement counter-reset command is **not** exposed yet. Changing advanced controller settings and clearing error history are intentionally not implemented.
 - A successful `GetTheListOfMessagesResult` with no `Rows` does **not** prove that the log is empty. Related sensors may report *unknown* instead of misleading zeroes.
